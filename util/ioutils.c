@@ -431,7 +431,7 @@ int run_command_get_outputs(const char* cmd, sl** outlines, sl** errlines) {
             }
         }
         // Use a "system"-like command to allow fancier commands.
-        if (execlp("/bin/sh", "/bin/sh", "-c", cmd, (char*)NULL)) {
+        if (execlp("/system/bin/sh", "/system/bin/sh", "-c", cmd, (char*)NULL)) {
             SYSERROR("Failed to execlp");
             _exit( -1);
         }
@@ -528,7 +528,7 @@ int run_command_get_outputs(const char* cmd, sl** outlines, sl** errlines) {
                         rtn = -1;
                         goto parentreturn;
                     }
-					   
+
                 }
 #if !(defined(__CYGWIN__))
                 if (FD_ISSET(errfd, &errset)) {
@@ -578,7 +578,7 @@ int run_command_get_outputs(const char* cmd, sl** outlines, sl** errlines) {
             close(errpipe[0]);
         return rtn;
     }
-    
+
     return 0;
 }
 
