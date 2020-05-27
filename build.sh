@@ -1,10 +1,14 @@
 #!/bin/bash
 
+###### PATHS AT BOTTOM MUST BE CHANGED FOR YOUR MACHINE
+
 set -e
 
 export API=28
 
-# aarch64-linux-android armv7a-linux-androideabi i686-linux-android x86_64-linux-android
+# aarch64-linux-android i686-linux-android x86_64-linux-android
+
+# dropped support for armv7a-linux-androideabi
 
 for TARGET in $@
 do
