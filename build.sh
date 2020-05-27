@@ -4,7 +4,9 @@ set -e
 
 export API=28
 
-for TARGET in aarch64-linux-android armv7a-linux-androideabi i686-linux-android x86_64-linux-android
+# aarch64-linux-android armv7a-linux-androideabi i686-linux-android x86_64-linux-android
+
+for TARGET in $@
 do
     export TARGET
 
