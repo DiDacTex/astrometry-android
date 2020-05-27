@@ -45,7 +45,7 @@ do
     export CFITS_LIB="-L/home/jonathan/work/build/$ABI/cfitsio/lib -lcfitsio"
 
     make
-    make install INSTALL_DIR=/home/jonathan/work/build/arm64-v8a/astrometry
+    make install INSTALL_DIR="/home/jonathan/work/build/$ABI/astrometry"
     make clean
     git clean -fX
 done
