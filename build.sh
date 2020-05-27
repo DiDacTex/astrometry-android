@@ -4,9 +4,9 @@ set -e
 
 export API=28
 
-#for TARGET in aarch64-linux-android armv7a-linux-androideabi i686-linux-android x86_64-linux-android
-#do
-    export TARGET=$1
+for TARGET in aarch64-linux-android armv7a-linux-androideabi i686-linux-android x86_64-linux-android
+do
+    export TARGET
 
     case $TARGET in
         aarch64*)
@@ -39,8 +39,10 @@ export API=28
     export RANLIB=$TOOLCHAIN/bin/$TRIPLE-ranlib
     export STRIP=$TOOLCHAIN/bin/$TRIPLE-strip
 
-    export CFITS_INC="-I/home/jonathan/work/build/arm64-v8a/include/"
-    export CFITS_SLIB="/home/jonathan/work/build/arm64-v8a/lib/libcfitsio.a"
+    export CFITS_INC="-I/home/jonathan/work/build/$ABI/cfitsio/include"
+    export CFITS_LIB="-L/home/jonathan/work/build/$ABI/cfitsio/lib -lcfitsio"
 
     make
-#done
+    make install INSTALL_DIR=/home/jonathan/work/build/arm64-v8a/astrometry
+    make clean
+done
