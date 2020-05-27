@@ -9,7 +9,9 @@ include $(COMMON)/makefile.common
 SO=$(SHAREDLIB_SUFFIX)
 
 .PHONY: all
-all: try_lib
+all:
+	@echo Hello
+#try_lib
 
 try_lib:
 	-$(MAKE) lib
