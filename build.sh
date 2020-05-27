@@ -45,4 +45,5 @@ do
     make
     make install INSTALL_DIR=/home/jonathan/work/build/arm64-v8a/astrometry
     make clean
+    git clean -fX
 done
