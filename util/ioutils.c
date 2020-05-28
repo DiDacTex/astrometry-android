@@ -637,11 +637,11 @@ char* shell_escape(const char* str) {
 }
 
 static char* get_temp_dir() {
-    char* dir = getenv("TMP");
-    if (!dir) {
-        dir = "/tmp";
-    }
-    return dir;
+    //char* dir = getenv("TMP");
+    //if (!dir) {
+    //    dir = "/tmp";
+    //}
+    return "/data/data/com.termux/cache";
 }
 
 char* create_temp_file(const char* fn, const char* dir) {

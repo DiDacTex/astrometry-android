@@ -140,7 +140,7 @@ void test_read_write_single_tree_unnamed(CuTest* ct) {
     kd = build_tree(ct, data, N, D, Nleaf, KDTT_DOUBLE, KD_BUILD_SPLIT);
     kd->name = NULL;
 
-    sprintf(fn, "/tmp/test_libkd_io_single_tree_unnamed.XXXXXX");
+    sprintf(fn, "/data/data/com.termux/cache/test_libkd_io_single_tree_unnamed.XXXXXX");
     fd = mkstemp(fn);
     if (fd == -1) {
         fprintf(stderr, "Failed to generate a temp filename: %s\n", strerror(errno));
@@ -177,7 +177,7 @@ void test_read_write_single_tree_named(CuTest* ct) {
                     KD_BUILD_SPLIT | KD_BUILD_BBOX | KD_BUILD_LINEAR_LR);
     kd->name = strdup("christmas");
 
-    sprintf(fn, "/tmp/test_libkd_io_single_tree_named.XXXXXX");
+    sprintf(fn, "/data/data/com.termux/cache/test_libkd_io_single_tree_named.XXXXXX");
     fd = mkstemp(fn);
     if (fd == -1) {
         fprintf(stderr, "Failed to generate a temp filename: %s\n", strerror(errno));
@@ -232,7 +232,7 @@ void test_read_write_two_trees(CuTest* ct) {
                      KD_BUILD_SPLIT | KD_BUILD_SPLITDIM | KD_BUILD_LINEAR_LR);
     kdB->name = strdup("watermelon");
 
-    sprintf(fn, "/tmp/test_libkd_io_two_trees.XXXXXX");
+    sprintf(fn, "/data/data/com.termux/cache/test_libkd_io_two_trees.XXXXXX");
     fd = mkstemp(fn);
     if (fd == -1) {
         fprintf(stderr, "Failed to generate a temp filename: %s\n", strerror(errno));
