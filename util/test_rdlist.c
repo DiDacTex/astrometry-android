@@ -5,12 +5,13 @@
 #include "rdlist.h"
 #include "fitsioutils.h"
 #include "qfits_header.h"
+#include "os-features.h"
 
 #include "cutest.h"
 
 static char* get_tmpfile(int i) {
     static char fn[256];
-    sprintf(fn, "/tmp/test-rdlist-%i", i);
+    sprintf(fn, CACHEDIR "/test-rdlist-%i", i);
     return strdup(fn);
 }
 
@@ -131,7 +132,7 @@ void test_read_write(CuTest* ct) {
     out = NULL;
 
 
-    
+
     in = rdlist_open(fn);
     CuAssertPtrNotNull(ct, in);
 

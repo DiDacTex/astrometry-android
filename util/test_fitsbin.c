@@ -8,10 +8,11 @@
 #include "fitsioutils.h"
 
 #include "cutest.h"
+#include "os-features.h"
 
 static char* get_tmpfile(int i) {
     static char fn[256];
-    sprintf(fn, "/tmp/test-fitsbin-%i", i);
+    sprintf(fn, CACHEDIR "/test-fitsbin-%i", i);
     return fn;
 }
 
@@ -137,7 +138,7 @@ void test_fitsbin_2(CuTest* ct) {
     indata = ch->data;
     CuAssertPtrNotNull(ct, indata);
     CuAssertIntEquals(ct, 0, memcmp(outdata, indata, sizeof(outdata)));
- 
+
     ch = fitsbin_get_chunk(in, 1);
     CuAssertIntEquals(ct, sizeof(double), ch->itemsize);
     CuAssertIntEquals(ct, N, ch->nrows);
@@ -265,7 +266,7 @@ void test_inmemory_fitsbin_2(CuTest* ct) {
     indata = ch->data;
     CuAssertPtrNotNull(ct, indata);
     CuAssertIntEquals(ct, 0, memcmp(outdata, indata, sizeof(outdata)));
- 
+
     ch = fitsbin_get_chunk(fb, 1);
     CuAssertIntEquals(ct, sizeof(double), ch->itemsize);
     CuAssertIntEquals(ct, N, ch->nrows);

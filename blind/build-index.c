@@ -43,7 +43,7 @@ static void add_boilerplate(index_params_t* p, qfits_header* hdr) {
 
 static int step_hpquads(index_params_t* p,
                         codefile_t** p_codes, quadfile_t** p_quads,
-                        char** p_codefn, char** p_quadfn, 
+                        char** p_codefn, char** p_quadfn,
                         startree_t* starkd, const char* skdtfn,
                         sl* tempfiles) {
     codefile_t* codes = NULL;
@@ -83,20 +83,20 @@ static int step_hpquads(index_params_t* p,
 
         if (hpquads_files(skdtfn, codefn, quadfn, p->Nside,
                           p->qlo, p->qhi, p->dimquads, p->passes, p->Nreuse, p->Nloosen,
-                          p->indexid, p->scanoccupied, 
+                          p->indexid, p->scanoccupied,
                           p->hpquads_sort_data, p->hpquads_sort_func, p->hpquads_sort_size,
                           p->args, p->argc)) {
             ERROR("hpquads failed");
             return -1;
         }
-		
+
     }
 
     if (p_codes) *p_codes = codes;
     if (p_quads) *p_quads = quads;
     if (p_codefn) *p_codefn = codefn;
     if (p_quadfn) *p_quadfn = quadfn;
-		
+
     return 0;
 }
 
@@ -129,7 +129,7 @@ static int step_codetree(index_params_t* p,
             return -1;
         }
     }
-	
+
     if (p_codekd) *p_codekd = codekd;
     if (p_ckdtfn) *p_ckdtfn = ckdtfn;
     return 0;
@@ -564,7 +564,7 @@ int build_index(fitstable_t* catalog, index_params_t* p,
     fitstable_close(uniform);
 
     // hpquads
-    if (step_hpquads(p, &codes, &quads, &codefn, &quadfn, 
+    if (step_hpquads(p, &codes, &quads, &codefn, &quadfn,
                      starkd, skdtfn,
                      tempfiles))
         return -1;
@@ -731,6 +731,6 @@ void build_index_defaults(index_params_t* p) {
     p->bighp = -1;
     //p->inmemory = TRUE;
     p->delete_tempfiles = TRUE;
-    p->tempdir = "/tmp";
+    p->tempdir = CACHEDIR;
 }
 

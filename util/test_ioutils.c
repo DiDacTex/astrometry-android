@@ -14,6 +14,7 @@
 #include "log.h"
 #include "tic.h"
 #include "md5.h"
+#include "os-features.h"
 
 void test_run_command_1(CuTest* tc) {
     int rtn;
@@ -180,7 +181,7 @@ void test_run_command(CuTest* tc) {
     int trial;
     log_init(3);
 
-    tmpfn = create_temp_file("test_run_command", "/tmp");
+    tmpfn = create_temp_file("test_run_command", CACHEDIR);
     CuAssertPtrNotNull(tc, tmpfn);
 
     for (trial=0; trial<4; trial++) {
@@ -240,7 +241,7 @@ void test_split_long_string(CuTest* tc) {
     CuAssertIntEquals(tc, 1, streq(sl_get(lst, 5), "several"));
     CuAssertIntEquals(tc, 1, streq(sl_get(lst, 6), "pieces"));
     sl_free2(lst);
-	
+
     // Arguable whether this is correct handling of multiple spaces...
     lst = split_long_string("extremely long line     with ridiculously long words necessitating hyphenationizing (?!)",
                             6, 10, NULL);

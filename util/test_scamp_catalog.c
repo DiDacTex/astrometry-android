@@ -5,13 +5,14 @@
 
 #include "scamp-catalog.h"
 #include "qfits_header.h"
+#include "os-features.h"
 
 #include "cutest.h"
 
 // This is really a demo, not a test.
 void test_scampcat_1(CuTest* tc) {
     qfits_header* hdr;
-    char* fn = create_temp_file("scampcat", "/tmp");
+    char* fn = create_temp_file("scampcat", CACHEDIR);
     printf("Creating scamp catalog: %s\n", fn);
     scamp_cat_t* scamp = scamp_catalog_open_for_writing(fn, FALSE);
     scamp_obj_t obj;
@@ -46,7 +47,7 @@ void test_scampcat_1(CuTest* tc) {
 // This is really a demo, not a test.
 void test_scampref_2(CuTest* tc) {
     qfits_header* hdr;
-    char* fn = create_temp_file("scampref", "/tmp");
+    char* fn = create_temp_file("scampref", CACHEDIR);
     printf("Creating scamp catalog: %s\n", fn);
     scamp_cat_t* scamp = scamp_catalog_open_for_writing(fn, TRUE);
     scamp_ref_t obj;

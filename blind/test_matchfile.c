@@ -11,13 +11,14 @@
 #include "matchobj.h"
 #include "an-bool.h"
 #include "starutil.h"
+#include "os-features.h"
 
 #define SAME(X) CuAssertIntEquals(tc, entry1.X, ein1->X)
 #define SAMEF(X) CuAssertDblEquals(tc, entry1.X, ein1->X, 1e-10)
 #define SAMESAME(X) CuAssertIntEquals(tc, 0, memcmp(ein1->X, entry1.X, sizeof(entry1.X)))
 
 void test_read_matchfile(CuTest* tc) {
-    char* fn = "/tmp/test-matchfile-0";
+    char *fn = CACHEDIR "/test-matchfile-0";
 
     MatchObj entry1;
     matchfile* out;

@@ -9,6 +9,8 @@
 #include "astrometry/os-features-config.h"
 #endif
 
+#define CACHEDIR "/data/data/com.termux/cache"
+
 // Features we use that aren't standard across all supported platforms
 
 #if defined(NEED_CANONICALIZE_FILE_NAME) && (NEED_CANONICALIZE_FILE_NAME == 0)

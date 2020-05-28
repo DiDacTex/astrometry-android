@@ -8,12 +8,13 @@
 #include "fitsioutils.h"
 #include "qfits_header.h"
 #include "log.h"
+#include "os-features.h"
 
 #include "cutest.h"
 
 static char* get_tmpfile(int i) {
     static char fn[256];
-    sprintf(fn, "/tmp/test-xylist-%i", i);
+    sprintf(fn, CACHEDIR "/test-xylist-%i", i);
     return strdup(fn);
 }
 
@@ -232,7 +233,7 @@ void test_read_write_xy(CuTest* ct) {
 
     out = NULL;
 
-    
+
     in = xylist_open(fn);
     CuAssertPtrNotNull(ct, in);
 

@@ -9,12 +9,13 @@
 #include "permutedsort.h"
 #include "an-endian.h"
 #include "qfits_header.h"
+#include "os-features.h"
 
 #include "cutest.h"
 
 static char* get_tmpfile(int i) {
     static char fn[256];
-    sprintf(fn, "/tmp/test-fitstable-%i", i);
+    sprintf(fn, CACHEDIR "/test-fitstable-%i", i);
     return fn;
 }
 
@@ -89,7 +90,7 @@ void test_copy_rows_file_to_memory(CuTest* ct) {
     // now re-open that file.
     t1 = fitstable_open(fn1);
     CuAssertPtrNotNull(ct, t1);
-	
+
     d1 = fitstable_read_column(t1, name1, dubl);
     d2 = fitstable_read_column(t1, name2, dubl);
     d3 = fitstable_read_column(t1, name3, dubl);
@@ -120,7 +121,7 @@ void test_copy_rows_file_to_memory(CuTest* ct) {
     fitstable_add_fits_columns_as_struct(t1);
     rtn = fitstable_copy_rows_data(t1, order, N1, t2);
     CuAssertIntEquals(ct, rtn, 0);
-	
+
     rtn = fitstable_fix_header(t2);
     CuAssertIntEquals(ct, rtn, 0);
 
@@ -229,7 +230,7 @@ void test_copy_rows_inmemory(CuTest* ct) {
 
     rtn = fitstable_switch_to_reading(t1);
     CuAssertIntEquals(ct, rtn, 0);
-	
+
     d1 = fitstable_read_column(t1, name1, dubl);
     d2 = fitstable_read_column(t1, name2, dubl);
     d3 = fitstable_read_column(t1, name3, dubl);
@@ -258,7 +259,7 @@ void test_copy_rows_inmemory(CuTest* ct) {
 
     rtn = fitstable_copy_rows_data(t1, order, N1, t2);
     CuAssertIntEquals(ct, rtn, 0);
-	
+
     rtn = fitstable_fix_header(t2);
     CuAssertIntEquals(ct, rtn, 0);
 
@@ -317,7 +318,7 @@ void test_one_column_write_read(CuTest* ct) {
     CuAssertPtrNotNull(ct, outtab);
 
     dubl = fitscolumn_double_type();
-    
+
     fitstable_add_write_column(outtab, dubl, "X", "foounits");
     CuAssertIntEquals(ct, fitstable_ncols(outtab), 1);
 
@@ -372,7 +373,7 @@ void test_headers(CuTest* ct) {
 
     CuAssertIntEquals(ct, 0, fitstable_write_primary_header(outtab));
     CuAssertIntEquals(ct, 0, fitstable_write_header(outtab));
-    
+
     CuAssertIntEquals(ct, 0, fitstable_ncols(outtab));
 
     CuAssertIntEquals(ct, 0, fitstable_close(outtab));
@@ -962,7 +963,7 @@ void test_inmemory_one_column_write_read(CuTest* ct) {
     CuAssertPtrNotNull(ct, tab);
 
     dubl = fitscolumn_double_type();
-    
+
     fitstable_add_write_column(tab, dubl, "X", "foounits");
     CuAssertIntEquals(ct, fitstable_ncols(tab), 1);
 
@@ -1013,7 +1014,7 @@ void test_inmemory_headers(CuTest* ct) {
 
     CuAssertIntEquals(ct, 0, fitstable_write_primary_header(tab));
     CuAssertIntEquals(ct, 0, fitstable_write_header(tab));
-    
+
     CuAssertIntEquals(ct, 0, fitstable_ncols(tab));
 
     // READING
@@ -1416,7 +1417,7 @@ void test_inmemory_struct_1(CuTest* ct) {
 
     CuAssertIntEquals(ct, 0, fitstable_fix_header(tab));
 
-	
+
 
     // reading
     CuAssertIntEquals(ct, 0, fitstable_switch_to_reading(tab));

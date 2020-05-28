@@ -10,6 +10,7 @@
 #include "tycho2.h"
 #include "tycho2-fits.h"
 #include "starutil.h"
+#include "os-features.h"
 
 static double deg2mas(double x) {
     return 1000.0 * deg2arcsec(x);
@@ -269,7 +270,7 @@ void test_read_raw(CuTest* tc) {
         "10.279|0.041|"
         " 75| |  1397B\r\n";
 
-    char* fn = "/tmp/test-tycho2-0";
+    char* fn = CACHEDIR "/test-tycho2-0";
 
     tycho2_entry entry1;
     tycho2_entry entry2;

@@ -23,6 +23,7 @@
 #include "sip.h"
 #include "sip_qfits.h"
 #include "healpix.h"
+#include "os-features.h"
 
 const char* OPTIONS = "hvx:w:l:u:o:d:I:N:p:R:L:Mn:U:S:f:r:J:X:Y:";
 
@@ -72,7 +73,7 @@ int main(int argc, char** argv) {
     int Nside;
 
     sl* tempfiles;
-    char* tempdir = "/tmp";
+    char *tempdir = CACHEDIR;
     int wcsext = 0;
     char* rdlsfn;
 
@@ -158,7 +159,7 @@ int main(int argc, char** argv) {
         default:
             return -1;
         }
-	
+
     log_init(loglvl);
 
     if (!xylsfn || !wcsfn || !indexfn) {
@@ -223,11 +224,11 @@ int main(int argc, char** argv) {
     logverb("Chose healpix Nside=%i, side length %g arcmin\n", Nside, healpix_side_length_arcmin(Nside));
     ip->Nside = Nside;
     ip->scanoccupied = TRUE;
-	
+
     if (build_index_files(rdlsfn, indexfn, ip)) {
         exit(-1);
     }
-        
+
     // allquads
     /*
      {

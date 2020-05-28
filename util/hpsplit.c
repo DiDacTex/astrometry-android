@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
     char* outfnpat = NULL;
     char* racol = "RA";
     char* deccol = "DEC";
-    char* tempdir = "/tmp";
+    char* tempdir = CACHEDIR;
     anbool gzip = FALSE;
     sl* cols = sl_new(16);
     sl* e_cols = sl_new(16);
@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
     anbool ringindex = FALSE;
     anbool closefiles = FALSE;
     off_t* resume_offsets = NULL;
-    
+
     fitstable_t* intable;
     fitstable_t* intable2;
     fitstable_t** outtables;
@@ -168,7 +168,7 @@ int main(int argc, char *argv[]) {
 
     for (i=0; i<nmyargs; i++)
         sl_append(infns, myargs[i]);
-        
+
     if (!sl_size(infns)) {
         printHelp(progname);
         printf("Need input filenames!\n");
@@ -193,7 +193,7 @@ int main(int argc, char *argv[]) {
         resume_offsets = calloc(NHP, sizeof(off_t));
         assert(resume_offsets);
     }
-    
+
     md = deg2dist(margin);
 
     /**
@@ -460,7 +460,7 @@ int main(int argc, char *argv[]) {
                 if (!outtables[hp]) {
                     char* outfn;
                     fitstable_t* out;
-                    
+
                     // MEMLEAK the output filename.  You'll live.
                     if (ringindex) {
                         int ringhp = healpix_xy_to_ring(hp, nside);
@@ -546,7 +546,7 @@ int main(int argc, char *argv[]) {
                     if (fitstable_write_struct(outtables[hp], rdata)) {
                         ERROR("Failed to copy a row of data from input table \"%s\" to output healpix %i", infn, hp);
                     }
-                    
+
                 } else {
                     if (fitstable_write_row_data(outtables[hp], rdata)) {
                         ERROR("Failed to copy a row of data from input table \"%s\" to output healpix %i", infn, hp);
@@ -644,7 +644,7 @@ int main(int argc, char *argv[]) {
     free(maxcaps);
 
     free(resume_offsets);
-    
+
     return 0;
 }
 

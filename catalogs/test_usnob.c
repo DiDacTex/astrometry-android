@@ -12,6 +12,7 @@
 #include "an-bool.h"
 #include "an-endian.h"
 #include "starutil.h"
+#include "os-features.h"
 
 static void assertZeroObs(CuTest* tc, const struct observation* o) {
     CuAssertIntEquals(tc,     0, o->mag);
@@ -109,7 +110,7 @@ void test_read_usnob(CuTest* tc) {
         0x00, 0x00, 0x00, 0x00, 0xb5, 0x7d, 0x03, 0x00, 0x8b, 0x9e,
         0x05, 0x00, 0x96, 0x8e, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00,
     };
-    char* fn = "/tmp/test-usnob-0";
+    char* fn = CACHEDIR "/test-usnob-0";
     int i;
 
     for (i=0; i<sizeof(line1)/sizeof(uint32_t); i++) {

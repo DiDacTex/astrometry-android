@@ -12,6 +12,7 @@
 #include "cutest.h"
 #include "bl.h"
 #include "ioutils.h"
+#include "os-features.h"
 
 #define STRING1A "I'm thread 1 -- you should see this message."
 #define STRING1B "I'm thread 1 -- you should NOT see this message."
@@ -61,8 +62,8 @@ void test_log_ts(CuTest* tc) {
     log_set_thread_specific();
     logmsg("Logging set thread specific.\n");
 
-    fn1 = create_temp_file("log", "/tmp");
-    fn2 = create_temp_file("log", "/tmp");
+    fn1 = create_temp_file("log", CACHEDIR);
+    fn2 = create_temp_file("log", CACHEDIR);
 
     logmsg("File 1 is %s\n", fn1);
     logmsg("File 2 is %s\n", fn2);

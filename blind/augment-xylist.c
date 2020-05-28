@@ -46,7 +46,7 @@ static void delete_existing_an_headers(qfits_header* hdr);
 
 void augment_xylist_init(augment_xylist_t* axy) {
     memset(axy, 0, sizeof(augment_xylist_t));
-    axy->tempdir = "/tmp";
+    axy->tempdir = CACHEDIR;
     axy->tweak = TRUE;
     axy->tweakorder = 2;
     axy->depths = il_new(4);
@@ -242,7 +242,7 @@ static an_option_t options[] = {
     {'F', "fields",         required_argument, NULL, NULL},
     {'w', "width",                 required_argument, "pixels",
      "specify the field width"},
-    {'e', "height",                required_argument, "pixels", 
+    {'e', "height",                required_argument, "pixels",
      "specify the field height"},
     {'X', "x-column",       required_argument, "column-name",
      "the FITS column containing the X coordinate of the sources"},
@@ -434,7 +434,7 @@ int augment_xylist_parse_option(char argchar, char* optarg,
         break;
     case 'V':
         sl_append(axy->verifywcs, optarg);
-        il_append(axy->verifywcs_ext, 
+        il_append(axy->verifywcs_ext,
                   (verify_extension >= 0 ? verify_extension : axy->extension));
         break;
     case 'I':
@@ -816,7 +816,7 @@ int augment_xylist(augment_xylist_t* axy,
         } else {
             fitsimgfn = create_temp_file("fits", axy->tempdir);
             sl_append_nocopy(tempfiles, fitsimgfn);
-            
+
             if (pnmtype == 'P') {
                 logverb("Converting PPM image to FITS...\n");
 

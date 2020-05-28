@@ -134,7 +134,7 @@ void test_read_2mass(CuTest* tc) {
     twomass_fits* out;
     twomass_fits* in;
     twomass_entry* ein;
-    char* fn = "/tmp/test-2mass-0";
+    char* fn = CACHEDIR "/test-2mass-0";
 
     memset(&entry, 0, sizeof(twomass_entry));
     CuAssertIntEquals(tc, 0, twomass_parse_entry(&entry, line1));
@@ -166,7 +166,7 @@ void test_read_2mass(CuTest* tc) {
 
 
 void test_fits_empty(CuTest* tc) {
-    char* fn = "/tmp/test-2mass-1";
+    char* fn = CACHEDIR "/test-2mass-1";
     twomass_fits* out;
     out = twomass_fits_open_for_writing(fn);
     CuAssertPtrNotNull(tc, out);

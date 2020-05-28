@@ -69,10 +69,10 @@ int run_command_get_outputs(const char* cmd, sl** outlines, sl** errlines);
 
 void get_mmap_size(size_t start, size_t size, off_t* mapstart, size_t* mapsize, int* pgap);
 
-// If "dir" is NULL, create temp file in $TMP, or /tmp if not set.
+// If "dir" is NULL, create temp file in $TMP, or CACHEDIR if not set.
 char* create_temp_file(const char* fn, const char* dir);
 
-// If "dir" is NULL, create temp file in $TMP, or /tmp if not set.
+// If "dir" is NULL, create temp file in $TMP, or CACHEDIR if not set.
 char* create_temp_dir(const char* name, const char* dir);
 
 char* shell_escape(const char* str);

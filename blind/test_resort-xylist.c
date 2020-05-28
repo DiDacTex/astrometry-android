@@ -11,6 +11,7 @@
 #include "xylist.h"
 #include "starxy.h"
 #include "resort-xylist.h"
+#include "os-features.h"
 
 void test_sorting(CuTest* tc) {
     double flux[] = { 50, 100, 50, 100, 20, 20, 40, 40 };
@@ -20,8 +21,8 @@ void test_sorting(CuTest* tc) {
 
     int i, N;
     starxy_t* s;
-    char* infn = "/tmp/test-resort-xylist";
-    char* outfn = "/tmp/test-resort-xylist-out";
+    char* infn = CACHEDIR "/test-resort-xylist";
+    char* outfn = CACHEDIR "/test-resort-xylist-out";
     xylist_t* xy;
 
     xylist_t* xy2;
