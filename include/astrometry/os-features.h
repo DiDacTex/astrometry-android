@@ -115,7 +115,7 @@ void qsort_r(void *base, size_t nmemb, size_t sz,
              int (*compar)(void *, const void *, const void *));
 #endif
 
-#if NEED_SWAP_QSORT_R
+#if 0 /*NEED_SWAP_QSORT_R*/
 #define QSORT_R(a,b,c,d,e) qsort_r(a,b,c,e,d)
 #define QSORT_COMPARISON_FUNCTION(func, thunk, v1, v2) func(v1, v2, thunk)
 
