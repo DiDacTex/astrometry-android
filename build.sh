@@ -10,7 +10,7 @@ export API=28
 
 # dropped support for armv7a-linux-androideabi
 
-for TARGET in $@
+for TARGET in aarch64-linux-android #$@
 do
     export TARGET
 
@@ -48,8 +48,22 @@ do
     export CFITS_INC="-I/home/jonathan/work/build/$ABI/cfitsio/include"
     export CFITS_LIB="-L/home/jonathan/work/build/$ABI/cfitsio/lib -lcfitsio"
 
+    #export OPTIMIZE=no
+
     make
-    make install INSTALL_DIR="/home/jonathan/work/build/$ABI/astrometry"
+    make install INSTALL_DIR="/home/jonathan/work/build/$ABI/anet-install"
     make clean
     git clean -fX
+
+    #pushd /home/jonathan/work/build/$ABI > /dev/null
+
+    #rm -rf package
+    #rm -rf astrometry/bin
+    #mkdir -p astrometry/bin
+    #cp -d anet-install/bin/* astrometry/bin
+    #rm -f astrometry.tar.gz
+    #tar zcf astrometry.tar.gz astrometry/
+    #explorer.exe .
+
+    #popd > /dev/null
 done
