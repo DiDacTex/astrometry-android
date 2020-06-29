@@ -756,7 +756,7 @@ int main(int argc, char** args) {
     me = find_executable(args[0], NULL);
 
     engineargs = sl_new(16);
-    append_executable(engineargs, "astrometry-engine", me);
+    append_executable(engineargs, "lib..astrometry-engine..so", me);
 
     // output filenames.
     outfiles = sl_new(16);
