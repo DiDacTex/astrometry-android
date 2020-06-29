@@ -46,7 +46,8 @@ do
     export STRIP=$TOOLCHAIN/bin/$TRIPLE-strip
 
     export CFITS_INC="-I/home/jonathan/work/build/$ABI/cfitsio/include"
-    export CFITS_LIB="-L/home/jonathan/work/build/$ABI/cfitsio/lib -lcfitsio"
+    export CFITS_LIB="/home/jonathan/work/build/$ABI/cfitsio/lib/libcfitsio.a"
+    #export CFITS_LIB="-L/home/jonathan/work/build/$ABI/cfitsio/lib -lcfitsio"
 
     #export OPTIMIZE=no
 
