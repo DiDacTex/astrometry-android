@@ -9,7 +9,8 @@
 #include "astrometry/os-features-config.h"
 #endif
 
-#define CACHEDIR "/data/data/com.termux/cache"
+// We actually override this on the command line
+#define CACHEDIR "/data/local/tmp"
 
 // Features we use that aren't standard across all supported platforms
 
