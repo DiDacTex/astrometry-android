@@ -73,7 +73,7 @@ To convert a JPEG to FITS: execute the following pipeline (replacing executable 
 
 Once you have a FITS image, the following Kotlin call will attempt to solve it:
 
-```
+```kotlin
 Runtime.getRuntime().exec(arrayOf(
     "/path/to/solve-field", "--no-plots", "--overwrite", "--no-remove-lines", "--uniformize", "0",
     "--fits-image", "--temp-dir", requireContext().cacheDir.absolutePath
