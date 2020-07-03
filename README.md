@@ -6,6 +6,8 @@ please see [README-original.md](https://github.com/DiDacTex/astrometry-android/b
 
 ## Building
 
+**NOTE: These instructions are a work in progress and are currently incomplete!**
+
 The building process for Android is summarized by the `build.sh` script in the repo root.
 **However, do not run that script directly!** It needs to be modified for your system.
 Follow this process:
