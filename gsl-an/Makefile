@@ -201,7 +201,7 @@ $(GSL_LIB): config.h $(GSL_OBJS)
 	$(RANLIB) $@
 
 config.h: configure config.h.in
-	./configure --enable-shared=no --prefix=`pwd`/stage --host=$(TARGET)
+	./configure --enable-shared=no --prefix=`pwd`/stage --host=$(COMPILER_TRIPLE)
 	touch $@
 
 config.h.in: ;

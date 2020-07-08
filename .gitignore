@@ -95,3 +95,5 @@ util/wcs-pv2sip
 report.txt
 .DS_Store
 /__init__.py
+cfitsio/
+build/

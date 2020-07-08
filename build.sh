@@ -6,65 +6,79 @@ set -e
 
 export API=28
 
-# aarch64-linux-android i686-linux-android x86_64-linux-android
+# ABIs are:
+# arm64-v8a armeabi-v7a x86 x86-64
 
-# dropped support for armv7a-linux-androideabi
+# ***Only arm64-v8a is confirmed to work!***
 
-for TARGET in aarch64-linux-android #$@
+for ABI in arm64-v8a
 do
-    export TARGET
-
-    case $TARGET in
-        aarch64*)
-            export ABI=arm64-v8a
+    # Set architecture variables
+    case $ABI in
+        arm64-v8a)
+            export COMPILER_TRIPLE=aarch64-linux-android
+            LIB_TRIPLE=$COMPILER_TRIPLE
             ;;
-        armv7a*)
-            export ABI=armeabi-v7a
+        armeabi-v7a)
+            export COMPILER_TRIPLE=armv7a-linux-androideabi
+            LIB_TRIPLE=arm-linux-androideabi
             ;;
-        i686*)
-            export ABI=x86
+        x86)
+            export COMPILER_TRIPLE=i686-linux-android
+            LIB_TRIPLE=$COMPILER_TRIPLE
             ;;
-        x86_64*)
-            export ABI=x86-64
+        x86-64)
+            export COMPILER_TRIPLE=x86_64-linux-android
+            LIB_TRIPLE=$COMPILER_TRIPLE
             ;;
     esac
 
-    export CC=$TOOLCHAIN/bin/$TARGET$API-clang
-    export CXX=$TOOLCHAIN/bin/$TARGET$API-clang++
+    # Identify tools for make
+    export CC=$TOOLCHAIN/bin/$COMPILER_TRIPLE$API-clang
+    export CXX=$TOOLCHAIN/bin/$COMPILER_TRIPLE$API-clang++
+    export AR=$TOOLCHAIN/bin/$LIB_TRIPLE-ar
+    export AS=$TOOLCHAIN/bin/$LIB_TRIPLE-as
+    export LD=$TOOLCHAIN/bin/$LIB_TRIPLE-ld
+    export RANLIB=$TOOLCHAIN/bin/$LIB_TRIPLE-ranlib
+    export STRIP=$TOOLCHAIN/bin/$LIB_TRIPLE-strip
 
-    if [[ "$TARGET" = "armv7a-linux-androideabi" ]]
-    then
-        export TRIPLE=arm-linux-androideabi
-    else
-        export TRIPLE=$TARGET
-    fi
+    # Installation prefix
+    PREFIX="$PWD/build/$ABI"
+    mkdir -p $PREFIX
 
-    export AR=$TOOLCHAIN/bin/$TRIPLE-ar
-    export AS=$TOOLCHAIN/bin/$TRIPLE-as
-    export LD=$TOOLCHAIN/bin/$TRIPLE-ld
-    export RANLIB=$TOOLCHAIN/bin/$TRIPLE-ranlib
-    export STRIP=$TOOLCHAIN/bin/$TRIPLE-strip
-
-    export CFITS_INC="-I/home/jonathan/work/build/$ABI/cfitsio/include"
-    export CFITS_LIB="/home/jonathan/work/build/$ABI/cfitsio/lib/libcfitsio.a"
-    #export CFITS_LIB="-L/home/jonathan/work/build/$ABI/cfitsio/lib -lcfitsio"
-
-    #export OPTIMIZE=no
-
+    # Build cfitsio
+    pushd cfitsio > /dev/null
+    ./configure --host=$COMPILER_TRIPLE --prefix="$PREFIX/cfitsio"
     make
-    make install INSTALL_DIR="/home/jonathan/work/build/$ABI/anet-install"
+    make install
+    make distclean
+    popd > /dev/null
+
+    # Set path to cfitsio for astrometry.net
+    CFITS_PATH="$PREFIX/cfitsio"
+    export CFITS_INC="-I$CFITS_PATH/include"
+    # Note: astrometry.net documentation says to use CFITS_SLIB for static
+    # linking, but that does not work. CFITS_LIB is required to get astrometry
+    # to statically link with cfitsio.
+    export CFITS_LIB="$CFITS_PATH/lib/libcfitsio.a"
+
+    # Build astrometry.net
+    make
+    make install INSTALL_DIR="$PREFIX/astrometry"
     make clean
     git clean -fX
 
-    #pushd /home/jonathan/work/build/$ABI > /dev/null
+    # Collect files for Android
+    pushd $PREFIX > /dev/null
+    JNILIBS="android/jniLibs/$ABI"
+    mkdir -p "$JNILIBS"
+    cp astrometry/bin/solve-field "$JNILIBS/lib..solve-field..so"
+    cp astrometry/bin/astrometry-engine "$JNILIBS/lib..astrometry-engine..so"
+    # Index files are architecture-independent
+    # You need to provide index files in the data directory
+    # Get them from http://data.astrometry.net/4100/
+    # Recommended set: 4115 to 4119
+    mkdir -p "android/assets/data"
 
-    #rm -rf package
-    #rm -rf astrometry/bin
-    #mkdir -p astrometry/bin
-    #cp -d anet-install/bin/* astrometry/bin
-    #rm -f astrometry.tar.gz
-    #tar zcf astrometry.tar.gz astrometry/
-    #explorer.exe .
-
-    #popd > /dev/null
+    popd > /dev/null
 done
