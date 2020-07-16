@@ -427,10 +427,10 @@ static int plot_index_overlay(augment_xylist_t* axy, const char* me,
     }
 
     matchfile_close(mf);
-			
+
     sl_append(cmdline, ">");
     append_escape(cmdline, redgreenfn);
-    
+
     cmd = sl_implode(cmdline, " ");
     sl_free2(cmdline);
     logverb("Running:\n  %s\n", cmd);
@@ -915,7 +915,7 @@ int main(int argc, char** args) {
         printf("ERROR: You didn't specify any files to process.\n");
         help = TRUE;
     }
-    
+
     if (help) {
     dohelp:
         print_help(args[0], opts);
@@ -1316,7 +1316,7 @@ int main(int argc, char** args) {
         fflush(NULL);
 
         // clean up and move on to the next file.
-    nextfile:        
+    nextfile:
         free(base);
         sl_free2(cmdline);
 
