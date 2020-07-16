@@ -91,7 +91,7 @@ static void close_datalogfid() {
     }
 }
 
-int main(int argc, char** args) {
+int astrometry_engine_main(int argc, char** args) {
     char* default_configfn = "astrometry.cfg";
     char* default_config_path = "../etc";
 

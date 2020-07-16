@@ -705,7 +705,7 @@ static void delete_temp_files(sl* tempfiles, sl* tempdirs) {
 }
 
 
-int main(int argc, char** args) {
+int solve_field_main(int argc, char** args) {
     int c;
     anbool help = FALSE;
     char* outdir = NULL;
