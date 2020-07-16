@@ -36,7 +36,7 @@ from astrometry.net.log import *
 from astrometry.net.tmpfile import *
 from astrometry.net.sdss_image import plot_sdss_image
 
-from astrometry.blind.plotstuff import *
+from astrometry.plot.plotstuff import *
 from astrometry.util import image2pnm
 from astrometry.util.run_command import run_command
 from astrometry.util.file import *
@@ -52,7 +52,7 @@ from astrometry.net.views.license import LicenseForm
 
 from astrometry.net.views.enhance import *
 
-import simplejson
+import json
 
 # repeat this import to override somebody else's import of the datetime module
 from datetime import datetime, timedelta
@@ -83,7 +83,7 @@ class UserImageForm(forms.ModelForm):
         self.fields['album'].choices = [('', 'none')]
         self.fields['album'].initial = ''
         user_image = kwargs.get('instance')
-        if user.is_authenticated():
+        if user.is_authenticated:
             for album in Album.objects.filter(user=user).all():
                 self.fields['album'].choices += [(album.id, album.title)]
                 if user_image and user_image in album.user_images.all():
@@ -128,7 +128,7 @@ def user_image(req, user_image_id=None):
         fullsize_url = images[image_type]
 
     flags = Flag.objects.all()
-    if req.user.is_authenticated():
+    if req.user.is_authenticated:
         selected_flags = [flagged_ui.flag for flagged_ui in
             FlaggedUserImage.objects.filter(
                 user_image=uimage,
@@ -169,7 +169,7 @@ def user_image(req, user_image_id=None):
         'comment_form': comment_form,
         #'license_form': license_form,
         'tag_form': tag_form,
-        'images': simplejson.dumps(images),
+        'images': json.dumps(images),
         'display_url': display_url,
         'fullsize_url': fullsize_url,
         'image_type': image_type,
@@ -178,7 +178,7 @@ def user_image(req, user_image_id=None):
         'wwt_url': wwturl,
     }
 
-    if uimage.is_public() or (req.user.is_authenticated() and uimage.user == req.user):
+    if uimage.is_public() or (req.user.is_authenticated and uimage.user == req.user):
         template = 'user_image/view.html'
     #elif SharedHideable.objects.filter(shared_with=req.user.id, hideable=image).count():
     #    template = 'user_image/view.html'
@@ -389,7 +389,7 @@ def onthesky_image(req, zoom=None, calid=None):
 
 def galex_image(req, calid=None, size='full'):
     from astrometry.util import util as anutil
-    from astrometry.blind import plotstuff as ps
+    from astrometry.plot import plotstuff as ps
     from astrometry.net.galex_jpegs import plot_into_wcs
     cal = get_object_or_404(Calibration, pk=calid)
     key = 'galex_size%s_cal%i' % (size, cal.id)

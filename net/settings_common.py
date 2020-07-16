@@ -1,7 +1,7 @@
 import os
 import astrometry.net
-import astrometry.net.secrets.django_db as secrets
-import astrometry.net.secrets.auth as authsecrets
+import astrometry.net.appsecrets.django_db as dbsecrets
+import astrometry.net.appsecrets.auth as authsecrets
 from astrometry.net.util import dict_pack
 
 ALLOWED_HOSTS = ['astro.cs.toronto.edu', 'nova2.astrometry.net', 'localhost',
@@ -61,7 +61,7 @@ BASEDIR = '/home/dstn/astrometry/src/'
 LOG_DIR = BASEDIR + 'astrometry/net/log/'
 ANDIR = BASEDIR + 'astrometry/'
 UTIL_DIR = ANDIR + 'util/'
-BLIND_DIR = ANDIR + 'blind/'
+SOLVER_DIR = ANDIR + 'solver/'
 JOB_QUEUE_DIR = DATADIR + 'job-queue/'
 
 JOB_DIR = DATADIR + 'web-data/'
@@ -111,10 +111,10 @@ DATABASES = {
         # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': '',
-        'USER': secrets.DATABASE_USER,
-        'PASSWORD': secrets.DATABASE_PASSWORD,
-        'HOST': secrets.DATABASE_HOST,
-        'PORT': secrets.DATABASE_PORT,
+        'USER': dbsecrets.DATABASE_USER,
+        'PASSWORD': dbsecrets.DATABASE_PASSWORD,
+        'HOST': dbsecrets.DATABASE_HOST,
+        'PORT': dbsecrets.DATABASE_PORT,
         }
 }
 
@@ -209,13 +209,15 @@ TEMPLATES = [
     },
 ]
 
-MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-)
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
 
 ROOT_URLCONF = 'astrometry.net.urls'
 

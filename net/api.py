@@ -22,9 +22,9 @@ from django.views.decorators.csrf import csrf_exempt
 # astrometry.net imports
 from astrometry.net.models import *
 from astrometry.net.views.submission import handle_upload
-from .api_util import *
-from .log import *
-from .tmpfile import *
+from astrometry.net.api_util import *
+from astrometry.net.log import *
+from astrometry.net.tmpfile import *
 import astrometry.net.settings
 
 # Content-type to return for JSON outputs.
@@ -97,7 +97,7 @@ def requires_json_login(handler):
         #print 'requires_json_login decorator running.'
         user = auth.get_user(request)
         #print 'user:', request.session
-        if not user.is_authenticated():
+        if not user.is_authenticated:
             return HttpResponseErrorJson('user is not authenticated.')
         return handler(request, *args, **kwargs)
     return handle_request
@@ -129,7 +129,7 @@ def upload_common(request, url=None, file=None):
         original_filename = 'json-xy'
     else:
         df, original_filename = handle_upload(file=file, url=url)
-    submittor = request.user if request.user.is_authenticated() else None
+    submittor = request.user if request.user.is_authenticated else None
     pro = get_user_profile(submittor)
     allow_commercial_use = json.get('allow_commercial_use', 'd')
     allow_modifications = json.get('allow_modifications', 'd')
@@ -202,7 +202,7 @@ def url_upload(req):
     logmsg('backend:', backend)
     user = backend.get_user(user_id)
     logmsg('user:', user)
-    logmsg('is_auth:', user.is_authenticated())
+    logmsg('is_auth:', user.is_authenticated)
 
     logmsg('request.user:', req.user)
 
@@ -352,7 +352,8 @@ def submission_status(req, sub_id):
         'user':sub.user.id,
         'processing_started':str(sub.processing_started),
         'processing_finished':str(sub.processing_finished),
-        'user_images':[image.id for image in sub.user_images.all()],
+        'user_images':[uimage.id for uimage in sub.user_images.all()],
+        'images':[uimage.image.id for uimage in sub.user_images.all()],
         'jobs':jobs,
         'job_calibrations':jobcals,
     }
@@ -438,7 +439,7 @@ def get_anns(cal, nbright=0):
     hipfn = settings.HIPPARCOS_CAT
     tycho2fn = settings.TYCHO2_KD
 
-    import astrometry.blind.plotann as plotann
+    import astrometry.plot.plotann as plotann
     opt = plotann.get_empty_opts()
     if nbright:
         opt.nbright = nbright
@@ -550,7 +551,22 @@ if __name__ == '__main__':
     # job = Job.objects.get(id=1649169)
     # cal = job.calibration
     # print(get_anns(cal))
-    class Duck(object):
-        pass
-    r = Duck()
-    print(submission_status(r, 2561176))
+    # class Duck(object):
+    #     pass
+    # r = Duck()
+    # print(submission_status(r, 2561176))
+
+    import logging
+    lvl = logging.DEBUG
+    logging.basicConfig(level=lvl, format='%(message)s', stream=sys.stdout)
+
+    from django.test import Client
+    c = Client()
+    r = c.post('/api/login', data={'request-json': '{"apikey": ""}'})
+    print('Got response:', r)
+
+    f = open('out', 'wb')
+    for x in r:
+        f.write(x)
+    f.close()
+    

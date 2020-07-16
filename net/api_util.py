@@ -1,11 +1,11 @@
-import simplejson
+import json
 
-def json2python(json):
+def json2python(j):
     try:
-        return simplejson.loads(json)
+        return json.loads(j)
     except:
         pass
     return None
 
-python2json = simplejson.dumps
+python2json = json.dumps
 

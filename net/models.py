@@ -2,6 +2,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 import os
 from datetime import datetime
+import itertools
 
 try:
     # py3
@@ -662,6 +663,17 @@ class Calibration(models.Model):
         r,d = self.get_center_radec()
         return '%.3f, %.3f' % (r, d)
 
+    def legacysurvey_viewer_url(self):
+        r,d = self.get_center_radec()
+        wcsobj = self.raw_tan.to_tanwcs()
+        h,w = wcsobj.shape
+        xx = [1, w, w, 1, 1]
+        yy = [1, 1, h, h, 1]
+        rr,dd = wcsobj.pixelxy2radec(xx, yy)
+        layer = 'unwise-neo6'
+        return ('http://legacysurvey.org/viewer/?ra=%.4f&dec=%.4f&layer=%s&poly=%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f' %
+                ((r, d, layer) + tuple(itertools.chain.from_iterable(zip(rr,dd)))))
+
     def format_ra_hms(self):
         r,d = self.get_center_radec()
         h,m,s  = ra2hmsstring(r).split()
@@ -911,7 +923,7 @@ class UserImageManager(models.Manager):
         return valid_uis.order_by('-submission__id')
 
     def public_only(self, user=None):
-        if user is not None and not user.is_authenticated():
+        if user is not None and not user.is_authenticated:
             user = None
         return self.all_visible().filter(Q(publicly_visible='y') | Q(user=user))
 
@@ -1289,7 +1301,7 @@ def get_user_profile(user):
 ## can't tell the difference between an attribute and a function, so
 ## this works.
 def context_user_profile(req):
-    if req.user.is_authenticated():
+    if req.user.is_authenticated:
         req.user.get_profile = get_user_profile(req.user)
     return dict(user=req.user)
 

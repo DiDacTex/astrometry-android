@@ -5,7 +5,7 @@ from astrometry.net.tmpfile import *
 from astrometry.net import settings
 
 from astrometry.util import util as anutil
-from astrometry.blind import plotstuff as ps
+from astrometry.plot import plotstuff as ps
 
 def plot_wcs_outline(tanwcs, plotfn, W=256, H=256, width=36, zoom=True,
                      zoomwidth=3.6, grid=10, hd=False, hd_labels=False,
@@ -79,7 +79,7 @@ def plot_wcs_outline(tanwcs, plotfn, W=256, H=256, width=36, zoom=True,
         I,nil,nil = trees_match(kd, kd2, r, permuted=False)
         del nil
         #print 'Matched', len(I)
-        xyz = spherematch_c.kdtree_get_positions(kd, I)
+        xyz = kd.get_data(I.astype(np.uint32))
         del I
         tree_free(kd2)
         tree_close(kd)
@@ -182,4 +182,18 @@ def plot_aitoff_wcs_outline(tanwcs, plotfn, W=256, zoom=True):
 
     plot.write(plotfn)
     
+    
+if __name__ == '__main__':
+    import os
+    import sys
+    os.environ['DJANGO_SETTINGS_MODULE'] = 'astrometry.net.settings'
+    p = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    sys.path.append(p)
+    import settings
+    import django
+    django.setup()
+    from django.test import Client
+    c = Client()
+    r = c.get('/sky_plot/zoom0/2859868')
+    print(r)
     
