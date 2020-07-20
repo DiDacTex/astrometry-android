@@ -40,6 +40,8 @@
 #include "new-wcs.h"
 #include "scamp.h"
 
+#include "jni.h"
+
 static an_option_t options[] = {
     {'h', "help",		   no_argument, NULL,
      "print this help message" },
@@ -756,7 +758,7 @@ int solve_field_main(int argc, char** args) {
     me = find_executable(args[0], NULL);
 
     engineargs = sl_new(16);
-    append_executable(engineargs, "lib..astrometry-engine..so", me);
+    //append_executable(engineargs, "lib..astrometry-engine..so", me);
 
     // output filenames.
     outfiles = sl_new(16);
@@ -919,7 +921,7 @@ int solve_field_main(int argc, char** args) {
     if (help) {
     dohelp:
         print_help(args[0], opts);
-        exit(rtn);
+        return rtn;
     }
 
     bl_free(opts);
@@ -1374,3 +1376,57 @@ int solve_field_main(int argc, char** args) {
     return 0;
 }
 
+JNIEXPORT jint JNICALL Java_com_didactex_find_utils_JNI_solveField(
+    JNIEnv* env,
+    jclass class, /* "JNI" class - unused */
+    jobjectArray *args
+) {
+    syslog(LOG_DEBUG, "checkpoint 1");
+    int argc = (*env)->GetArrayLength(env, args);
+    syslog(LOG_DEBUG, "checkpoint 2");
+    char** argv = malloc(sizeof(char*) * (argc + 2));
+    syslog(LOG_DEBUG, "checkpoint 3");
+    syslog(LOG_DEBUG, "checkpoint 4");
+    if (argv == NULL) {
+        (*env)->ThrowNew(
+            env,
+            (*env)->FindClass(env, "java/lang/RuntimeException"),
+            "malloc failed");
+    }
+    syslog(LOG_DEBUG, "checkpoint 4A");
+    int i;
+
+    argv[0] = "solve-field";
+    syslog(LOG_DEBUG, "checkpoint 5");
+    for (i = 1; i < argc; i++) {
+        syslog(LOG_DEBUG, "checkpoint 5.1");
+        jstring strobj = (jstring)((*env)->GetObjectArrayElement(env, args, i));
+        syslog(LOG_DEBUG, "checkpoint 5.2");
+        const char* arg = (*env)->GetStringUTFChars(env, strobj, NULL);
+        syslog(LOG_DEBUG, "checkpoint 5.3");
+        char* argcopy = strdup(arg);
+        syslog(LOG_DEBUG, "checkpoint 5.4");
+        if (argcopy == NULL) {
+            (*env)->ThrowNew(
+                env,
+                (*env)->FindClass(env, "java/lang/RuntimeException"),
+                "strdup failed");
+        }
+        syslog(LOG_DEBUG, "checkpoint 5.5");
+        argv[i] = argcopy;
+        syslog(LOG_DEBUG, "checkpoint 5.6");
+        (*env)->ReleaseStringUTFChars(env, strobj, arg);
+        syslog(LOG_DEBUG, "checkpoint 5.7");
+        (*env)->DeleteLocalRef(env, strobj);
+    }
+    syslog(LOG_DEBUG, "checkpoint 6");
+    argv[argc] = NULL;
+
+    syslog(LOG_DEBUG, "checkpoint 7");
+    int result = solve_field_main(argc, argv);
+    syslog(LOG_DEBUG, "checkpoint 8");
+    free(argv);
+    syslog(LOG_DEBUG, "checkpoint 9");
+
+    return result;
+}
