@@ -119,6 +119,11 @@ int astrometry_engine_main(int argc, char** args) {
 
     engine = engine_new();
 
+    // Reset getopt for a new argument vector.
+    // The Android system header says to set optreset = 1 rather than
+    // changing optind, but optreset doesn't work. Only this works.
+    optind = 1;
+
     while (1) {
         c = opts_getopt(opts, argc, args);
         if (c == -1)
