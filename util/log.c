@@ -9,6 +9,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <assert.h>
+#include <syslog.h>
 
 #include "log.h"
 #include "an-thread.h"
@@ -91,16 +92,16 @@ static void loglvl(const log_t* logger, enum log_level level,
     if (level > logger->level)
         return;
     AN_THREAD_LOCK(loglock);
-    if (logger->f) {
-        if (logger->timestamp)
-            fprintf(logger->f, "[%6i: %.3f] ", (int)getpid(), timenow() - logger->t0);
-        //fprintf(logger->f, "%s:%i ", file, line);
-        vfprintf(logger->f, format, va);
-        fflush(logger->f);
+    int syslevel = LOG_DEBUG;
+    switch (level) {
+        case LOG_ERROR:
+            syslevel = LOG_ERR;
+            break;
+        case LOG_MSG:
+            syslevel = LOG_INFO;
+            break;
     }
-    if (logger->logfunc) {
-        logger->logfunc(logger->baton, level, file, line, func, format, va);
-    }
+    vsyslog(syslevel, format, va);
     AN_THREAD_UNLOCK(loglock);
 }
 
