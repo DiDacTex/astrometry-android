@@ -510,18 +510,24 @@ static char* none_is_null(char* in) {
     return streq(in, "none") ? NULL : in;
 }
 
-static void run_engine(sl* engineargs) {
-    char* cmd;
-    cmd = sl_implode(engineargs, " ");
-    logmsg("Solving...\n");
-    logverb("Running:\n  %s\n", cmd);
-    fflush(NULL);
-    if (run_command_get_outputs(cmd, NULL, NULL)) {
-        ERROR("engine failed.  Command that failed was:\n  %s", cmd);
-        exit(-1);
+int astrometry_engine_main(int argc, char** args);
+
+static int run_engine(sl* engineargs) {
+    size_t argc = sl_size(engineargs) + 1;
+    char** argv = malloc(sizeof(char*) * (argc + 1));
+    argv[0] = "astrometry-engine";
+    for (int i = 1; i < argc; i++) {
+        argv[i] = sl_get(engineargs, i - 1);
     }
-    free(cmd);
+    logmsg("Solving...\n");
     fflush(NULL);
+    if (astrometry_engine_main(argc, argv)) {
+        ERROR("engine failed.");
+        return -1;
+    }
+    free(argv);
+    fflush(NULL);
+    return 0;
 }
 
 struct solve_field_args {
@@ -1308,7 +1314,9 @@ int solve_field_main(int argc, char** args) {
             axy->wcs_last_mod = 0;
 
         if (!engine_batch) {
-            run_engine(engineargs);
+            if (run_engine(engineargs)) {
+                return -1;
+            }
             after_solved(axy, sf, makeplots, me, verbose,
                          axy->tempdir, tempdirs, tempfiles, plotscale, bgfn);
         } else {
@@ -1339,7 +1347,9 @@ int solve_field_main(int argc, char** args) {
     }
 
     if (engine_batch) {
-        run_engine(engineargs);
+        if (run_engine(engineargs)) {
+            return -1;
+        }
         for (i=0; i<bl_size(batchaxy); i++) {
             augment_xylist_t* axy = bl_access(batchaxy, i);
             solve_field_args_t* sf = bl_access(batchsf, i);
