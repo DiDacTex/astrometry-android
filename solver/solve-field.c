@@ -541,6 +541,7 @@ struct solve_field_args {
 };
 typedef struct solve_field_args solve_field_args_t;
 
+#define UNSOLVED (1000.0)
 
 // This runs after "astrometry-engine" is run on the file.
 static void after_solved(augment_xylist_t* axy,
@@ -552,9 +553,12 @@ static void after_solved(augment_xylist_t* axy,
                          sl* tempdirs,
                          sl* tempfiles,
                          double plotscale,
-                         const char* bgfn) {
+                         const char* bgfn,
+                         double radec[]) {
     sip_t wcs;
-    double ra, dec, fieldw, fieldh;
+    double ra = UNSOLVED;
+    double dec = UNSOLVED;
+    double fieldw, fieldh;
     char rastr[32], decstr[32];
     char* fieldunits;
 
@@ -688,6 +692,9 @@ static void after_solved(augment_xylist_t* axy,
             exit(-1);
         }
     }
+
+    radec[0] = ra;
+    radec[1] = dec;
 }
 
 static void delete_temp_files(sl* tempfiles, sl* tempdirs) {
@@ -713,7 +720,7 @@ static void delete_temp_files(sl* tempfiles, sl* tempdirs) {
 }
 
 
-int solve_field_main(int argc, char** args) {
+int solve_field_main(int argc, char** args, double radec[]) {
     int c;
     anbool help = FALSE;
     char* outdir = NULL;
@@ -1318,7 +1325,7 @@ int solve_field_main(int argc, char** args) {
                 return -1;
             }
             after_solved(axy, sf, makeplots, me, verbose,
-                         axy->tempdir, tempdirs, tempfiles, plotscale, bgfn);
+                axy->tempdir, tempdirs, tempfiles, plotscale, bgfn, radec);
         } else {
             bl_append(batchaxy, axy);
             bl_append(batchsf,  sf );
@@ -1355,7 +1362,7 @@ int solve_field_main(int argc, char** args) {
             solve_field_args_t* sf = bl_access(batchsf, i);
 
             after_solved(axy, sf, makeplots, me, verbose,
-                         axy->tempdir, tempdirs, tempfiles, plotscale, bgfn);
+                axy->tempdir, tempdirs, tempfiles, plotscale, bgfn, radec);
             errors_print_stack(stdout);
             errors_clear_stack();
             logmsg("\n");
@@ -1389,7 +1396,8 @@ int solve_field_main(int argc, char** args) {
 JNIEXPORT jint JNICALL Java_com_didactex_find_utils_JNI_solveField(
     JNIEnv* env,
     jclass class, /* "JNI" class - unused */
-    jobjectArray *args
+    jobjectArray* args,
+    jdoubleArray* coords
 ) {
     int argc = (*env)->GetArrayLength(env, args) + 1;
     char** argv = malloc(sizeof(char*) * (argc + 1));
@@ -1417,7 +1425,8 @@ JNIEXPORT jint JNICALL Java_com_didactex_find_utils_JNI_solveField(
     }
     argv[argc] = NULL;
 
-    int result = solve_field_main(argc, argv);
+    double radec[2] = {UNSOLVED, UNSOLVED};
+    int result = solve_field_main(argc, argv, &radec);
 
     // strdup returns need to be freed
     for (int i = 1; i < argc; i++) {
@@ -1425,5 +1434,6 @@ JNIEXPORT jint JNICALL Java_com_didactex_find_utils_JNI_solveField(
     }
     free(argv);
 
+    (*env)->SetDoubleArrayRegion(env, coords, 0, 2, radec);
     return result;
 }
