@@ -1391,8 +1391,8 @@ JNIEXPORT jint JNICALL Java_com_didactex_find_utils_JNI_solveField(
     jclass class, /* "JNI" class - unused */
     jobjectArray *args
 ) {
-    int argc = (*env)->GetArrayLength(env, args);
-    char** argv = malloc(sizeof(char*) * (argc + 2));
+    int argc = (*env)->GetArrayLength(env, args) + 1;
+    char** argv = malloc(sizeof(char*) * (argc + 1));
     if (argv == NULL) {
         (*env)->ThrowNew(
             env,
@@ -1403,7 +1403,7 @@ JNIEXPORT jint JNICALL Java_com_didactex_find_utils_JNI_solveField(
 
     argv[0] = "solve-field";
     for (i = 1; i < argc; i++) {
-        jstring strobj = (jstring)((*env)->GetObjectArrayElement(env, args, i));
+        jstring strobj = (jstring)((*env)->GetObjectArrayElement(env, args, i - 1));
         const char* arg = (*env)->GetStringUTFChars(env, strobj, NULL);
         char* argcopy = strdup(arg);
         if (argcopy == NULL) {
