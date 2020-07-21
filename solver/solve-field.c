@@ -1399,10 +1399,9 @@ JNIEXPORT jint JNICALL Java_com_didactex_find_utils_JNI_solveField(
             (*env)->FindClass(env, "java/lang/RuntimeException"),
             "malloc failed");
     }
-    int i;
 
     argv[0] = "solve-field";
-    for (i = 1; i < argc; i++) {
+    for (int i = 1; i < argc; i++) {
         jstring strobj = (jstring)((*env)->GetObjectArrayElement(env, args, i - 1));
         const char* arg = (*env)->GetStringUTFChars(env, strobj, NULL);
         char* argcopy = strdup(arg);
@@ -1419,6 +1418,11 @@ JNIEXPORT jint JNICALL Java_com_didactex_find_utils_JNI_solveField(
     argv[argc] = NULL;
 
     int result = solve_field_main(argc, argv);
+
+    // strdup returns need to be freed
+    for (int i = 1; i < argc; i++) {
+        free(argv[i]);
+    }
     free(argv);
 
     return result;
