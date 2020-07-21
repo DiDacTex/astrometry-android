@@ -961,7 +961,7 @@ int solve_field_main(int argc, char** args) {
     if (outdir) {
         if (mkdir_p(outdir)) {
             ERROR("Failed to create output directory %s", outdir);
-            exit(-1);
+            return -1;
         }
     }
 
@@ -1176,7 +1176,7 @@ int solve_field_main(int argc, char** args) {
             } else if (overwrite) {
                 if (unlink(fn)) {
                     SYSERROR("Failed to delete an already-existing output file \"%s\"", fn);
-                    exit(-1);
+                    return -1;
                 }
             } else {
                 logmsg("Output file already exists: \"%s\".\n"
@@ -1231,7 +1231,7 @@ int solve_field_main(int argc, char** args) {
             if (run_command(cmd, &ctrlc)) {
                 ERROR("%s command %s", sl_get(cmdline, 0),
                       (ctrlc ? "was cancelled" : "failed"));
-                exit(-1);
+                return -1;
             }
             sl_remove_all(cmdline);
             free(cmd);
@@ -1278,7 +1278,7 @@ int solve_field_main(int argc, char** args) {
 
         if (augment_xylist(axy, me)) {
             ERROR("augment-xylist failed");
-            exit(-1);
+            return -1;
         }
 
         if (just_augment)

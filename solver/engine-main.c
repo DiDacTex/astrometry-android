@@ -163,7 +163,7 @@ int astrometry_engine_main(int argc, char** args) {
             break;
         default:
             printf("Unknown flag %c\n", c);
-            exit( -1);
+            return -1;
         }
     }
 
@@ -174,7 +174,7 @@ int astrometry_engine_main(int argc, char** args) {
     }
     if (help) {
         print_help(args[0], opts);
-        exit(0);
+        return 0;
     }
     bl_free(opts);
 
@@ -203,7 +203,7 @@ int astrometry_engine_main(int argc, char** args) {
             fin = fopen(infn, "rb");
             if (!fin) {
                 ERROR("Failed to open file %s for reading input filenames", infn);
-                exit(-1);
+                return -1;
             }
         } else
             fin = stdin;
@@ -249,7 +249,7 @@ int astrometry_engine_main(int argc, char** args) {
     if (!streq(configfn, "none")) {
         if (engine_parse_config_file(engine, configfn)) {
             logerr("Failed to parse (or encountered an error while interpreting) config file \"%s\"\n", configfn);
-            exit( -1);
+            return -1;
         }
     }
 
@@ -261,12 +261,12 @@ int astrometry_engine_main(int argc, char** args) {
             int flags = GLOB_TILDE | GLOB_BRACE;
             if (glob(s, flags, NULL, &myglob)) {
                 SYSERROR("Failed to expand wildcards in index-file path \"%s\"", s);
-                exit(-1);
+                return -1;
             }
             for (c=0; c<myglob.gl_pathc; c++) {
                 if (engine_add_index(engine, myglob.gl_pathv[c])) {
                     ERROR("Failed to add index \"%s\"", myglob.gl_pathv[c]);
-                    exit(-1);
+                    return -1;
                 }
             }
             globfree(&myglob);
@@ -280,12 +280,12 @@ int astrometry_engine_main(int argc, char** args) {
                "See http://astrometry.net/use.html about how to get some index files.\n"
                "---------------------------------------------------------------------\n"
                "\n", configfn);
-        exit(-1);
+        return -1;
     }
 
     if (engine->minwidth <= 0.0 || engine->maxwidth <= 0.0) {
         logerr("\"minwidth\" and \"maxwidth\" in the config file %s must be positive!\n", configfn);
-        exit(-1);
+        return -1;
     }
 
     free(configfn);
@@ -322,7 +322,7 @@ int astrometry_engine_main(int argc, char** args) {
         job = engine_read_job_file(engine, jobfn);
         if (!job) {
             ERROR("Failed to read job file \"%s\"", jobfn);
-            exit(-1);
+            return -1;
         }
 
 	if (basedir) {
