@@ -1393,7 +1393,7 @@ int solve_field_main(int argc, char** args, double radec[]) {
     return 0;
 }
 
-JNIEXPORT jint JNICALL Java_com_didactex_find_utils_JNI_solveField(
+JNIEXPORT jint JNICALL Java_net_astrometry_JNI_solveField(
     JNIEnv* env,
     jclass class, /* "JNI" class - unused */
     jobjectArray* args,
