@@ -88,7 +88,7 @@ NOT_INSTALLED_PIPELINE := agreeable certifiable \
 	augment-xylist merge-index index-to-table setsolved \
 	uniformize-catalog local-index index-info control-program
 
-PIPELINE := wcs-grab solve-field
+PIPELINE := wcs-grab
 
 MAIN_PROGS := image2xy new-wcs fits-guess-scale startree
 # hpquads
@@ -96,7 +96,7 @@ MAIN_PROGS := image2xy new-wcs fits-guess-scale startree
 SIMPLE_PROGS := wcs-grab get-wcs query-starkd
 # hpowned
 
-PROGS := astrometry-engine build-astrometry-index \
+PROGS := build-astrometry-index \
 	$(MAIN_PROGS) $(SIMPLE_PROGS)
 
 PROSPECTUS := quadidx codeprojections quadscales quadsperstar \
@@ -127,7 +127,9 @@ $(ENGINE_LIB): $(ENGINE_OBJS)
 	$(AR) rc $@ $(ENGINE_OBJS)
 	$(RANLIB) $@
 
-$(ENGINE_SO): $(ENGINE_OBJS) $(SLIB)
+SOLVER_OBJS := engine-main.o solve-field.o augment-xylist.o image2xy-files.o
+
+$(ENGINE_SO): $(ENGINE_OBJS) $(SOLVER_OBJS) $(SLIB) $(CFITS_LIB)
 	$(CC) $(LDFLAGS) $(SHAREDLIBFLAGS) -o $@ $^ $(LDLIBS)
 
 # old and miscellaneous executables that aren't part of the pipeline.
@@ -308,11 +310,11 @@ unpermute-stars: unpermute-stars-main.o $(SLIB)
 	$(CC) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 ALL_OBJ += unpermute-stars-main.o
 
-astrometry-engine: engine-main.o $(SLIB)
-	$(CC) -o $@ $(CFLAGS) $(LDFLAGS) $^ $(LDLIBS)
+#astrometry-engine: engine-main.o $(SLIB)
+#	$(CC) -o $@ $(CFLAGS) $(LDFLAGS) $^ $(LDLIBS)
 
-solve-field: solve-field.o augment-xylist.o image2xy-files.o $(SLIB) $(CFITS_SLIB)
-	$(CC) -o $@ $(CFLAGS) $(LDFLAGS) $^ $(CFITS_LIB) $(LDLIBS)
+#solve-field: solve-field.o augment-xylist.o image2xy-files.o $(SLIB) $(CFITS_SLIB)
+#	$(CC) -o $@ $(CFLAGS) $(LDFLAGS) $^ $(CFITS_LIB) $(LDLIBS)
 ALL_OBJ += solve-field.o image2xy-files.o
 
 augment-xylist: augment-xylist-main.o augment-xylist.o image2xy-files.o \

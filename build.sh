@@ -66,14 +66,15 @@ do
     make
     make install INSTALL_DIR="$PREFIX/astrometry"
     make clean
-    git clean -fX
+    git clean -fx
 
     # Collect files for Android
     pushd $PREFIX > /dev/null
     JNILIBS="android/jniLibs/$ABI"
     mkdir -p "$JNILIBS"
-    cp astrometry/bin/solve-field "$JNILIBS/lib..solve-field..so"
-    cp astrometry/bin/astrometry-engine "$JNILIBS/lib..astrometry-engine..so"
+    cp astrometry/lib/libastrometry.so $JNILIBS
+    #cp astrometry/bin/solve-field "$JNILIBS/lib..solve-field..so"
+    #cp astrometry/bin/astrometry-engine "$JNILIBS/lib..astrometry-engine..so"
     # Index files are architecture-independent
     # You need to provide index files in the data directory
     # Get them from http://data.astrometry.net/4100/

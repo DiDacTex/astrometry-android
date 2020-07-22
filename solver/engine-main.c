@@ -56,9 +56,9 @@ static an_option_t myopts[] = {
     {'v', "verbose", no_argument, NULL, "+verbose"},
     {'c', "config",  required_argument, "file",
      "Use this config file (default: \"astrometry.cfg\" in the directory ../etc/ relative to the directory containing the \"astrometry-engine\" executable); 'none' for no config file"},
-    {'d', "base-dir",  required_argument, "dir", 
+    {'d', "base-dir",  required_argument, "dir",
      "set base directory of all output filenames."},
-    {'C', "cancel",  required_argument, "file", 
+    {'C', "cancel",  required_argument, "file",
      "quit solving if this file appears" },
     {'s', "solved",  required_argument, "file",
      "write to this file when a field is solved"},
@@ -91,7 +91,7 @@ static void close_datalogfid() {
     }
 }
 
-int main(int argc, char** args) {
+int astrometry_engine_main(int argc, char** args) {
     char* default_configfn = "astrometry.cfg";
     char* default_config_path = "../etc";
 
@@ -118,6 +118,11 @@ int main(int argc, char** args) {
     char* datalog = NULL;
 
     engine = engine_new();
+
+    // Reset getopt for a new argument vector.
+    // The Android system header says to set optreset = 1 rather than
+    // changing optind, but optreset doesn't work. Only this works.
+    optind = 1;
 
     while (1) {
         c = opts_getopt(opts, argc, args);
@@ -163,7 +168,7 @@ int main(int argc, char** args) {
             break;
         default:
             printf("Unknown flag %c\n", c);
-            exit( -1);
+            return -1;
         }
     }
 
@@ -174,7 +179,7 @@ int main(int argc, char** args) {
     }
     if (help) {
         print_help(args[0], opts);
-        exit(0);
+        return 0;
     }
     bl_free(opts);
 
@@ -203,7 +208,7 @@ int main(int argc, char** args) {
             fin = fopen(infn, "rb");
             if (!fin) {
                 ERROR("Failed to open file %s for reading input filenames", infn);
-                exit(-1);
+                return -1;
             }
         } else
             fin = stdin;
@@ -249,7 +254,7 @@ int main(int argc, char** args) {
     if (!streq(configfn, "none")) {
         if (engine_parse_config_file(engine, configfn)) {
             logerr("Failed to parse (or encountered an error while interpreting) config file \"%s\"\n", configfn);
-            exit( -1);
+            return -1;
         }
     }
 
@@ -261,12 +266,12 @@ int main(int argc, char** args) {
             int flags = GLOB_TILDE | GLOB_BRACE;
             if (glob(s, flags, NULL, &myglob)) {
                 SYSERROR("Failed to expand wildcards in index-file path \"%s\"", s);
-                exit(-1);
+                return -1;
             }
             for (c=0; c<myglob.gl_pathc; c++) {
                 if (engine_add_index(engine, myglob.gl_pathv[c])) {
                     ERROR("Failed to add index \"%s\"", myglob.gl_pathv[c]);
-                    exit(-1);
+                    return -1;
                 }
             }
             globfree(&myglob);
@@ -280,12 +285,12 @@ int main(int argc, char** args) {
                "See http://astrometry.net/use.html about how to get some index files.\n"
                "---------------------------------------------------------------------\n"
                "\n", configfn);
-        exit(-1);
+        return -1;
     }
 
     if (engine->minwidth <= 0.0 || engine->maxwidth <= 0.0) {
         logerr("\"minwidth\" and \"maxwidth\" in the config file %s must be positive!\n", configfn);
-        exit(-1);
+        return -1;
     }
 
     free(configfn);
@@ -322,7 +327,7 @@ int main(int argc, char** args) {
         job = engine_read_job_file(engine, jobfn);
         if (!job) {
             ERROR("Failed to read job file \"%s\"", jobfn);
-            exit(-1);
+            return -1;
         }
 
 	if (basedir) {

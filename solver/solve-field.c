@@ -40,6 +40,8 @@
 #include "new-wcs.h"
 #include "scamp.h"
 
+#include "jni.h"
+
 static an_option_t options[] = {
     {'h', "help",		   no_argument, NULL,
      "print this help message" },
@@ -427,10 +429,10 @@ static int plot_index_overlay(augment_xylist_t* axy, const char* me,
     }
 
     matchfile_close(mf);
-			
+
     sl_append(cmdline, ">");
     append_escape(cmdline, redgreenfn);
-    
+
     cmd = sl_implode(cmdline, " ");
     sl_free2(cmdline);
     logverb("Running:\n  %s\n", cmd);
@@ -508,18 +510,24 @@ static char* none_is_null(char* in) {
     return streq(in, "none") ? NULL : in;
 }
 
-static void run_engine(sl* engineargs) {
-    char* cmd;
-    cmd = sl_implode(engineargs, " ");
-    logmsg("Solving...\n");
-    logverb("Running:\n  %s\n", cmd);
-    fflush(NULL);
-    if (run_command_get_outputs(cmd, NULL, NULL)) {
-        ERROR("engine failed.  Command that failed was:\n  %s", cmd);
-        exit(-1);
+int astrometry_engine_main(int argc, char** args);
+
+static int run_engine(sl* engineargs) {
+    size_t argc = sl_size(engineargs) + 1;
+    char** argv = malloc(sizeof(char*) * (argc + 1));
+    argv[0] = "astrometry-engine";
+    for (int i = 1; i < argc; i++) {
+        argv[i] = sl_get(engineargs, i - 1);
     }
-    free(cmd);
+    logmsg("Solving...\n");
     fflush(NULL);
+    if (astrometry_engine_main(argc, argv)) {
+        ERROR("engine failed.");
+        return -1;
+    }
+    free(argv);
+    fflush(NULL);
+    return 0;
 }
 
 struct solve_field_args {
@@ -533,6 +541,7 @@ struct solve_field_args {
 };
 typedef struct solve_field_args solve_field_args_t;
 
+#define UNSOLVED (1000.0)
 
 // This runs after "astrometry-engine" is run on the file.
 static void after_solved(augment_xylist_t* axy,
@@ -544,9 +553,12 @@ static void after_solved(augment_xylist_t* axy,
                          sl* tempdirs,
                          sl* tempfiles,
                          double plotscale,
-                         const char* bgfn) {
+                         const char* bgfn,
+                         double radec[]) {
     sip_t wcs;
-    double ra, dec, fieldw, fieldh;
+    double ra = UNSOLVED;
+    double dec = UNSOLVED;
+    double fieldw, fieldh;
     char rastr[32], decstr[32];
     char* fieldunits;
 
@@ -680,6 +692,9 @@ static void after_solved(augment_xylist_t* axy,
             exit(-1);
         }
     }
+
+    radec[0] = ra;
+    radec[1] = dec;
 }
 
 static void delete_temp_files(sl* tempfiles, sl* tempdirs) {
@@ -705,7 +720,7 @@ static void delete_temp_files(sl* tempfiles, sl* tempdirs) {
 }
 
 
-int main(int argc, char** args) {
+int solve_field_main(int argc, char** args, double radec[]) {
     int c;
     anbool help = FALSE;
     char* outdir = NULL;
@@ -756,7 +771,7 @@ int main(int argc, char** args) {
     me = find_executable(args[0], NULL);
 
     engineargs = sl_new(16);
-    append_executable(engineargs, "lib..astrometry-engine..so", me);
+    //append_executable(engineargs, "lib..astrometry-engine..so", me);
 
     // output filenames.
     outfiles = sl_new(16);
@@ -915,11 +930,11 @@ int main(int argc, char** args) {
         printf("ERROR: You didn't specify any files to process.\n");
         help = TRUE;
     }
-    
+
     if (help) {
     dohelp:
         print_help(args[0], opts);
-        exit(rtn);
+        return rtn;
     }
 
     bl_free(opts);
@@ -959,7 +974,7 @@ int main(int argc, char** args) {
     if (outdir) {
         if (mkdir_p(outdir)) {
             ERROR("Failed to create output directory %s", outdir);
-            exit(-1);
+            return -1;
         }
     }
 
@@ -1174,7 +1189,7 @@ int main(int argc, char** args) {
             } else if (overwrite) {
                 if (unlink(fn)) {
                     SYSERROR("Failed to delete an already-existing output file \"%s\"", fn);
-                    exit(-1);
+                    return -1;
                 }
             } else {
                 logmsg("Output file already exists: \"%s\".\n"
@@ -1229,7 +1244,7 @@ int main(int argc, char** args) {
             if (run_command(cmd, &ctrlc)) {
                 ERROR("%s command %s", sl_get(cmdline, 0),
                       (ctrlc ? "was cancelled" : "failed"));
-                exit(-1);
+                return -1;
             }
             sl_remove_all(cmdline);
             free(cmd);
@@ -1276,7 +1291,7 @@ int main(int argc, char** args) {
 
         if (augment_xylist(axy, me)) {
             ERROR("augment-xylist failed");
-            exit(-1);
+            return -1;
         }
 
         if (just_augment)
@@ -1306,9 +1321,11 @@ int main(int argc, char** args) {
             axy->wcs_last_mod = 0;
 
         if (!engine_batch) {
-            run_engine(engineargs);
+            if (run_engine(engineargs)) {
+                return -1;
+            }
             after_solved(axy, sf, makeplots, me, verbose,
-                         axy->tempdir, tempdirs, tempfiles, plotscale, bgfn);
+                axy->tempdir, tempdirs, tempfiles, plotscale, bgfn, radec);
         } else {
             bl_append(batchaxy, axy);
             bl_append(batchsf,  sf );
@@ -1316,7 +1333,7 @@ int main(int argc, char** args) {
         fflush(NULL);
 
         // clean up and move on to the next file.
-    nextfile:        
+    nextfile:
         free(base);
         sl_free2(cmdline);
 
@@ -1337,13 +1354,15 @@ int main(int argc, char** args) {
     }
 
     if (engine_batch) {
-        run_engine(engineargs);
+        if (run_engine(engineargs)) {
+            return -1;
+        }
         for (i=0; i<bl_size(batchaxy); i++) {
             augment_xylist_t* axy = bl_access(batchaxy, i);
             solve_field_args_t* sf = bl_access(batchsf, i);
 
             after_solved(axy, sf, makeplots, me, verbose,
-                         axy->tempdir, tempdirs, tempfiles, plotscale, bgfn);
+                axy->tempdir, tempdirs, tempfiles, plotscale, bgfn, radec);
             errors_print_stack(stdout);
             errors_clear_stack();
             logmsg("\n");
@@ -1374,3 +1393,47 @@ int main(int argc, char** args) {
     return 0;
 }
 
+JNIEXPORT jint JNICALL Java_net_astrometry_JNI_solveField(
+    JNIEnv* env,
+    jclass class, /* "JNI" class - unused */
+    jobjectArray* args,
+    jdoubleArray* coords
+) {
+    int argc = (*env)->GetArrayLength(env, args) + 1;
+    char** argv = malloc(sizeof(char*) * (argc + 1));
+    if (argv == NULL) {
+        (*env)->ThrowNew(
+            env,
+            (*env)->FindClass(env, "java/lang/RuntimeException"),
+            "malloc failed");
+    }
+
+    argv[0] = "solve-field";
+    for (int i = 1; i < argc; i++) {
+        jstring strobj = (jstring)((*env)->GetObjectArrayElement(env, args, i - 1));
+        const char* arg = (*env)->GetStringUTFChars(env, strobj, NULL);
+        char* argcopy = strdup(arg);
+        if (argcopy == NULL) {
+            (*env)->ThrowNew(
+                env,
+                (*env)->FindClass(env, "java/lang/RuntimeException"),
+                "strdup failed");
+        }
+        argv[i] = argcopy;
+        (*env)->ReleaseStringUTFChars(env, strobj, arg);
+        (*env)->DeleteLocalRef(env, strobj);
+    }
+    argv[argc] = NULL;
+
+    double radec[2] = {UNSOLVED, UNSOLVED};
+    int result = solve_field_main(argc, argv, &radec);
+
+    // strdup returns need to be freed
+    for (int i = 1; i < argc; i++) {
+        free(argv[i]);
+    }
+    free(argv);
+
+    (*env)->SetDoubleArrayRegion(env, coords, 0, 2, radec);
+    return result;
+}
