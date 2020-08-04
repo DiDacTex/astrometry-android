@@ -42,6 +42,8 @@
 #include "log.h"
 #include "anqfits.h"
 
+#include "jni.h"
+
 static void delete_existing_an_headers(qfits_header* hdr);
 
 void augment_xylist_init(augment_xylist_t* axy) {
@@ -655,7 +657,8 @@ static void add_sip_coeffs(qfits_header* hdr, const char* prefix, const sip_t* s
 }
 
 int augment_xylist(augment_xylist_t* axy,
-                   const char* me) {
+                   const char* me,
+                   JNIEnv* env) {
     // tempfiles to delete when we finish
     sl* tempfiles;
     sl* cmd;
@@ -1052,16 +1055,22 @@ int augment_xylist(augment_xylist_t* axy,
         }
         logverb("Removing lines of (spurious) sources from xylist \"%s\", writing to \"%s\"\n",
                 xylsfn, nolinesfn);
-        append_executable(cmd, "removelines", me);
-        if (axy->xcol)
-            sl_appendf(cmd, "-X %s", axy->xcol);
-        if (axy->ycol)
-            sl_appendf(cmd, "-Y %s", axy->ycol);
-        //if (axy->extension)
-        //    sl_appendf(cmd, "-e %i", axy->extension);
-        append_escape(cmd, xylsfn);
-        append_escape(cmd, nolinesfn);
-        run(cmd, verbose);
+        jclass jni_class = (*env)->FindClass(env, "net/astrometry/JNI");
+        jmethodID func = (*env)->GetStaticMethodID(env, jni_class, "removelines", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+        jstring infile = (*env)->NewStringUTF(env, xylsfn);
+        jstring outfile = (*env)->NewStringUTF(env, nolinesfn);
+        jstring xcol, ycol;
+        if (axy->xcol) {
+            xcol = (*env)->NewStringUTF(env, axy->xcol);
+        } else {
+            xcol = (*env)->NewStringUTF(env, "X");
+        }
+        if (axy->ycol) {
+            ycol = (*env)->NewStringUTF(env, axy->ycol);
+        } else {
+            ycol = (*env)->NewStringUTF(env, "Y");
+        }
+        (*env)->CallStaticVoidMethod(env, jni_class, func, infile, outfile, xcol, ycol);
         xylsfn = nolinesfn;
     }
 

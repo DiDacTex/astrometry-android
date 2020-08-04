@@ -13,6 +13,8 @@
 #include "astrometry/bl.h"
 #include "astrometry/an-opts.h"
 
+#include "jni.h"
+
 #define SCALE_UNITS_DEG_WIDTH 0
 #define SCALE_UNITS_ARCMIN_WIDTH 1
 #define SCALE_UNITS_ARCSEC_PER_PIX 2
@@ -155,7 +157,8 @@ typedef struct augment_xylist_s augment_xylist_t;
 int parse_scale_units(const char* str);
 
 int augment_xylist(augment_xylist_t* args,
-                   const char* executable_path);
+                   const char* executable_path,
+                   JNIEnv *env);
 
 void augment_xylist_init(augment_xylist_t* args);
 
