@@ -1,5 +1,6 @@
 # astrometry-android
 This is a fork of [astrometry.net](https://github.com/dstndstn/astrometry.net) modified to run on Android as a JNI library.
+As presented here, Chaquopy is used to run some Python portions of the astrometry.net suite.
 
 For the original README, which includes attributions, license statements, links to the original project, and an academic citation,
 please see [README-original.md](https://github.com/DiDacTex/astrometry-android/blob/master/README-original.md).
@@ -31,7 +32,7 @@ Follow this process:
    Unpack the tarball into a folder inside the root of this repo, and rename the folder to `cfitsio`.
    (Make sure you use exactly this name, because the build script expects it.)
 1. Choose your **minimum** API level (*not* target API) and set the `API` variable at the top of the script accordingly.
-   Astrometry.net requires API 28 at minimum because it uses the `glob()` and `globfree()` library functions,
+   Astrometry.net requires at least API 28 because it uses the `glob()` and `globfree()` library functions,
    which are not available with lower API levels.
    If you wish to use a lower API level, some people needing those functions for other purposes
    have had success with a modified version of the glob library from BSD, which you can Google for yourself.
@@ -50,16 +51,17 @@ The first two contain the "installation" of those packages, which you can ignore
 
 ## Packaging
 
-Copy the librar(y/ies) from the `build` folder and place them in folders in your project's `jniLibs` folder named by ABI.
-For example, the ARM64 library would go at `jniLibs/arm64-v8a/libastrometry.so`.
-(`jniLibs` goes in your project's `main` folder, alongside the `AndroidManifest.xml`.)
+Copy the folders from the `build/android` folder and place them in your project's `main` folder, alongside the `AndroidManifest.xml`.
+If the `assets`, `jniLibs`, or `python` folders already exist in `main`, merge the contents.
+Be sure to keep the ABI subfolder(s) inside `jniLibs`.
+Note that the `python` folder assumes Chaquopy; if you are using a different distribution, adjustments may be necessary.
 
 You also need index files. For smartphone photography, we recommend [these wide-angle indexes](http://data.astrometry.net/4100/).
 Indexes 4115 through 4119 are probably a good set for smartphones, assuming that your users are merely pointing the camera at the sky.
 They may not work as well if the camera is being zoomed or held up to a telescope.
 Place these index files in your project's `assets` folder (or a subfolder of that folder).
 
-Finally, on app launch, you will need to copy the index files from the assets to your app's internal (or external) files directory,
+On app launch, you will need to copy the index files from the assets to your app's internal (or external) files directory,
 as well as write a backend config file.
 The latter is not provided by this build because it needs to include the path to your index directory on the phone's storage medium,
 after the files have been copied out of assets. A suggested config file looks something like this:
@@ -74,19 +76,49 @@ autoindex
 Adjust the CPU limit as you see fit, and change the path to point to your index files
 (best to query the files directory from the Android API).
 
-Finally, we do not yet directly provide the Java code needed to interface with the library. Fortunately, it's simple.
+Finally, we do not yet directly provide the Java code needed to interface with the library and run Python scripts.
+Fortunately, it's simple.
 Within your project's `java` folder, create subfolders for the package `net.astrometry`,
-and place a single file in that folder named `JNI.java`. In that file, copy and paste the following five lines:
+and place a single file in that folder named `JNI.java`.
+In that file, copy and paste the following code, assuming you are using Chaquopy for Python:
 
 ```java
 package net.astrometry;
 
+import com.chaquo.python.Kwarg;
+import com.chaquo.python.PyObject;
+import com.chaquo.python.Python;
+
 public class JNI {
+    static Python python = Python.getInstance();
+
     public static native int solveField(String[] args, double[] results);
+
+    // This function is called from libastrometry.so via JNI
+    public static void removelines(String infile, String outfile, String xcol, String ycol) {
+        PyObject module = python.getModule("astrometry.util.removelines");
+        module.callAttr("removelines", infile, outfile, new Kwarg("xcol", xcol), new Kwarg("ycol", ycol));
+    }
+
+    // This function is called from libastrometry.so via JNI
+    public static void uniformize(String infile, String outfile, int n, String xcol, String ycol) {
+        PyObject module = python.getModule("astrometry.util.uniformize");
+        module.callAttr("uniformize", infile, outfile, n, new Kwarg("xcol", xcol), new Kwarg("ycol", ycol));
+    }
 }
 ```
 
-Once you've done this, you're ready to use the library.
+Note for Chaquopy: you will need to follow the documentation to use pip to install `numpy` and `pyfits`.
+`pyfits` will NOT install from PyPI;
+you will need to clone the GitHub repo, check out the 3.4 tag, delete all C files,
+and remove them and the `numpy_extension_hook` from `setup.cfg`,
+then build an sdist or a wheel and place it in your source tree for local installation.
+
+If you are using a different Python implementation,
+you will need to rewrite the body of the `removelines` and `uniformize` methods
+and install `numpy` and `pyfits` according to that distribution's documentation.
+
+Once you've completed these steps, you're ready to use the library in your project.
 
 ## Running
 
@@ -105,7 +137,7 @@ A recommended way to call the function in Kotlin is:
 ```kotlin
 val results = DoubleArray(2)
 val args = arrayOf(
-    "--no-plots", "--overwrite", "--no-remove-lines", "--uniformize", "0",
+    "--no-plots", "--overwrite",
     "--fits-image", "--temp-dir", requireContext().cacheDir.absolutePath
     "--backend-config", "/path/to/config/file", "/path/to/FITS/image")
 val code = JNI.solveField(args, results)
@@ -114,11 +146,11 @@ if (code == 0) {
 }
 ```
 
-Brief explanation: Plotting code isn't built, so `--no-plots` disables plotting explicitly.
+Brief explanation:
+Plotting code isn't built, so `--no-plots` disables plotting explicitly.
 (Plotting will disable itself if it doesn't find the necessary bits,
-but prints an annoying error message unless you explicitly disable it.)
+but outputs a useless error message unless you explicitly disable it.)
 `--overwrite` prevents it from failing if you process an image twice.
-`--no-remove-lines` and `--uniformize 0` both disable features that require Python.
 `--fits-image` prevents astrometry.net from attempting a pointless and
 guaranteed-to-fail conversion from FITS to PNM and back to FITS.
 `--temp-dir` and its argument point the code at your app's cache directory,
