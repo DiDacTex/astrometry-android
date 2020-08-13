@@ -1049,7 +1049,6 @@ int augment_xylist(augment_xylist_t* axy,
     }
 
     jclass jni_class = (*env)->FindClass(env, "net/astrometry/JNI");
-    jstring infile = (*env)->NewStringUTF(env, xylsfn);
     jstring xcol, ycol;
     if (axy->xcol) {
         xcol = (*env)->NewStringUTF(env, axy->xcol);
@@ -1072,6 +1071,7 @@ int augment_xylist(augment_xylist_t* axy,
         jmethodID func = (*env)->GetStaticMethodID(
             env, jni_class, "removelines",
             "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+        jstring infile = (*env)->NewStringUTF(env, xylsfn);
         jstring outfile = (*env)->NewStringUTF(env, nolinesfn);
         (*env)->CallStaticVoidMethod(env, jni_class, func, infile, outfile, xcol, ycol);
         xylsfn = nolinesfn;
@@ -1126,6 +1126,7 @@ int augment_xylist(augment_xylist_t* axy,
         jmethodID func = (*env)->GetStaticMethodID(
             env, jni_class, "uniformize",
             "(Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;)V");
+        jstring infile = (*env)->NewStringUTF(env, xylsfn);
         jstring outfile = (*env)->NewStringUTF(env, unixylsfn);
         (*env)->CallStaticVoidMethod(env, jni_class, func, infile, outfile, axy->uniformize, xcol, ycol);
         xylsfn = unixylsfn;
