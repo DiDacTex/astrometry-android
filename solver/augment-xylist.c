@@ -1048,6 +1048,7 @@ int augment_xylist(augment_xylist_t* axy,
         }
     }
 
+    // Prepare to call removelines and uniformize
     jclass jni_class = (*env)->FindClass(env, "net/astrometry/JNI");
     jstring xcol, ycol;
     if (axy->xcol) {
@@ -1068,6 +1069,7 @@ int augment_xylist(augment_xylist_t* axy,
         }
         logverb("Removing lines of (spurious) sources from xylist \"%s\", writing to \"%s\"\n",
                 xylsfn, nolinesfn);
+        // removelines(String infile, String outfile, String xcol, String ycol)
         jmethodID func = (*env)->GetStaticMethodID(
             env, jni_class, "removelines",
             "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
@@ -1123,6 +1125,7 @@ int augment_xylist(augment_xylist_t* axy,
             unixylsfn = create_temp_file("uniform", axy->tempdir);
             sl_append_nocopy(tempfiles, unixylsfn);
         }
+        // uniformize(String infile, String outfile, int n, String xcol, String ycol)
         jmethodID func = (*env)->GetStaticMethodID(
             env, jni_class, "uniformize",
             "(Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;)V");

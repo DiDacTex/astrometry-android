@@ -513,6 +513,7 @@ static char* none_is_null(char* in) {
 int astrometry_engine_main(int argc, char** args);
 
 static int run_engine(sl* engineargs) {
+    // Construct artificial argv
     size_t argc = sl_size(engineargs) + 1;
     char** argv = malloc(sizeof(char*) * (argc + 1));
     argv[0] = "astrometry-engine";
@@ -521,6 +522,7 @@ static int run_engine(sl* engineargs) {
     }
     logmsg("Solving...\n");
     fflush(NULL);
+    // Call astromtery-engine
     if (astrometry_engine_main(argc, argv)) {
         ERROR("engine failed.");
         return -1;
@@ -771,7 +773,6 @@ int solve_field_main(int argc, char** args, double radec[], JNIEnv* env) {
     me = find_executable(args[0], NULL);
 
     engineargs = sl_new(16);
-    //append_executable(engineargs, "lib..astrometry-engine..so", me);
 
     // output filenames.
     outfiles = sl_new(16);
@@ -1399,6 +1400,7 @@ JNIEXPORT jint JNICALL Java_net_astrometry_JNI_solveField(
     jobjectArray* args,
     jdoubleArray* coords
 ) {
+    // Convert Java String array to C char**
     int argc = (*env)->GetArrayLength(env, args) + 1;
     char** argv = malloc(sizeof(char*) * (argc + 1));
     if (argv == NULL) {
@@ -1425,6 +1427,7 @@ JNIEXPORT jint JNICALL Java_net_astrometry_JNI_solveField(
     }
     argv[argc] = NULL;
 
+    // Call solve-field
     double radec[2] = {UNSOLVED, UNSOLVED};
     int result = solve_field_main(argc, argv, radec, env);
 
@@ -1434,6 +1437,7 @@ JNIEXPORT jint JNICALL Java_net_astrometry_JNI_solveField(
     }
     free(argv);
 
+    // Set coordinates in output array
     (*env)->SetDoubleArrayRegion(env, coords, 0, 2, radec);
     return result;
 }
