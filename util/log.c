@@ -92,7 +92,7 @@ static void loglvl(const log_t* logger, enum log_level level,
     if (level > logger->level)
         return;
     AN_THREAD_LOCK(loglock);
-    int syslevel = LOG_DEBUG;
+    int syslevel;
     switch (level) {
         case LOG_ERROR:
             syslevel = LOG_ERR;
@@ -100,6 +100,8 @@ static void loglvl(const log_t* logger, enum log_level level,
         case LOG_MSG:
             syslevel = LOG_INFO;
             break;
+        default:
+            syslevel = LOG_DEBUG;
     }
     vsyslog(syslevel, format, va);
     AN_THREAD_UNLOCK(loglock);
