@@ -541,7 +541,7 @@ struct solve_field_args {
 };
 typedef struct solve_field_args solve_field_args_t;
 
-#define UNSOLVED (1000.0)
+#define UNSOLVED 1000.0
 
 // This runs after "astrometry-engine" is run on the file.
 static void after_solved(augment_xylist_t* axy,
