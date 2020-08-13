@@ -720,7 +720,7 @@ static void delete_temp_files(sl* tempfiles, sl* tempdirs) {
 }
 
 
-int solve_field_main(int argc, char** args, double radec[]) {
+int solve_field_main(int argc, char** args, double radec[], JNIEnv* env) {
     int c;
     anbool help = FALSE;
     char* outdir = NULL;
@@ -1289,7 +1289,7 @@ int solve_field_main(int argc, char** args, double radec[]) {
 
         axy->keep_fitsimg = (newfits || scamp);
 
-        if (augment_xylist(axy, me)) {
+        if (augment_xylist(axy, me, env)) {
             ERROR("augment-xylist failed");
             return -1;
         }
@@ -1426,7 +1426,7 @@ JNIEXPORT jint JNICALL Java_net_astrometry_JNI_solveField(
     argv[argc] = NULL;
 
     double radec[2] = {UNSOLVED, UNSOLVED};
-    int result = solve_field_main(argc, argv, &radec);
+    int result = solve_field_main(argc, argv, radec, env);
 
     // strdup returns need to be freed
     for (int i = 1; i < argc; i++) {
