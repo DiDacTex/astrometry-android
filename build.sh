@@ -69,17 +69,25 @@ do
     git clean -fx
 
     # Collect files for Android
-    pushd $PREFIX > /dev/null
+    pushd build > /dev/null
     JNILIBS="android/jniLibs/$ABI"
     mkdir -p "$JNILIBS"
-    cp astrometry/lib/libastrometry.so $JNILIBS
-    #cp astrometry/bin/solve-field "$JNILIBS/lib..solve-field..so"
-    #cp astrometry/bin/astrometry-engine "$JNILIBS/lib..astrometry-engine..so"
-    # Index files are architecture-independent
-    # You need to provide index files in the data directory
-    # Get them from http://data.astrometry.net/4100/
-    # Recommended set: 4115 to 4119
-    mkdir -p "android/assets/data"
-
+    cp "$ABI/astrometry/lib/libastrometry.so" $JNILIBS
     popd > /dev/null
 done
+
+# Python and index files are ABI-independent
+
+pushd build > /dev/null
+
+PYTHONFOLDER="android/python"
+mkdir -p "$PYTHONFOLDER"
+# Use last ABI; all should be the same
+cp -r "$ABI/astrometry/lib/python/astrometry" $PYTHONFOLDER
+
+# You need to provide index files in the data directory
+# Get them from http://data.astrometry.net/4100/
+# Recommended set: 4115 to 4119
+mkdir -p "android/assets/data"
+
+popd > /dev/null
